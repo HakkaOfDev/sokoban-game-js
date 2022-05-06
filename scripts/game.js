@@ -212,7 +212,7 @@ function allOnTarget() {
  * @param {{box: boolean, posBox?: {x:number, y:number}}} update
  */
 function changeOnMove(pos, newPos, update) {
-  //On remplace déplace la box si il y en a une devant le joueur
+  // We replace the box if there is one in front of the player
   if (update.box) {
     if (update.posBox) {
       temporaryMap[update.posBox.y] = replaceAt(
@@ -222,13 +222,13 @@ function changeOnMove(pos, newPos, update) {
       );
     }
   }
-  //On déplace le joueur sur la case suivante (là ou il veut aller)
+  // We move the player to the next square (where he wants to go)
   temporaryMap[newPos?.y] = replaceAt(
     temporaryMap[newPos?.y],
     newPos?.x,
     PLAYER
   );
-  //On remplace la case sur laquelle était le joueur par du vide ou une cible.
+  // The square on which the player was standing is replaced by a blank or a target.
   temporaryMap[pos?.y] = replaceAt(
     temporaryMap[pos?.y],
     pos?.x,
@@ -334,9 +334,9 @@ function move(direction) {
   if (allOnTarget() && actualLevel !== 6) {
     setTimeout(() => {
       alert(
-        `Vous avez terminé le niveau, appuyez sur la touche ESPACE pour passer au niveau ${
+        `You've completed this level, press the SPACE key to go on the level ${
           actualLevel + 2
-        }`
+        }.`
       );
     }, 20);
   }
@@ -388,10 +388,10 @@ function displayWinMessage() {
  */
 function backToPreviousMove() {
   if (states.length !== 0) {
-    const penultimateMove = states[states.length - 2]; // avant dernière action effectuée (position précédente du joueur)
-    const lastMove = states[states.length - 1]; // dernière action effectuée (position actuelle du joueur)
+    const penultimateMove = states[states.length - 2]; // Penultimate player move
+    const lastMove = states[states.length - 1]; // Last player move (actual position)
     if (penultimateMove) {
-      // nécessite de nettoyer la position du joueur ou il est (puisqu'on revient en arrière) mais faut penser à vérifier si la case n'était pas une cible
+      // Needs to clean up the position of the player where he is (since we go backwards) but we have to check if the square was not a target
       temporaryMap[lastMove.playerPosition.y] = replaceAt(
         temporaryMap[lastMove.playerPosition.y],
         lastMove.playerPosition.x,
@@ -403,15 +403,15 @@ function backToPreviousMove() {
           ? TARGET
           : GROUND
       );
-      // on doit réafficher le joueur ou il était avant donc on utilise son avant dernière action
+      // We have to display the player where he was before so we use his second last action
       temporaryMap[penultimateMove.playerPosition.y] = replaceAt(
         temporaryMap[penultimateMove.playerPosition.y],
         penultimateMove.playerPosition.x,
         PLAYER
       );
-      // nécessite de check si on a déplacer une boîte
+      // Needs to check if you have moved a box
       if (lastMove.boxPosition !== undefined) {
-        // on vérifie si lors de la dernière action effectuée, la box deplacé est une box validée dans ce cas on peut déterminer si la case est une target ou du vide
+        // We check if during the last action performed, the moved box is a validated box in this case we can determine if the box is a target or empty
         temporaryMap[lastMove.boxPosition.y] = replaceAt(
           temporaryMap[lastMove.boxPosition.y],
           lastMove.boxPosition.x,
@@ -419,7 +419,7 @@ function backToPreviousMove() {
             ? TARGET
             : GROUND
         );
-        // on vérifie si lors de la dernière action effectuée, la boite était sur une cible, si oui on remplace par une validated box et sinon par une box
+        // We check if the box was on a target during the last action, if so we replace it with a validated box and if not with a box
         temporaryMap[lastMove.playerPosition.y] = replaceAt(
           temporaryMap[lastMove.playerPosition.y],
           lastMove.playerPosition.x,
@@ -429,7 +429,7 @@ function backToPreviousMove() {
         ); //
       }
     } else {
-      //Si le joueur s'est déplacé qu'une seule fois, on reset le niveau
+      // If the player has moved only once, the level is reset
       states.pop();
       initLevel(actualLevel);
       buildLevel(actualLevel);
