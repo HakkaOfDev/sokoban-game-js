@@ -1,0 +1,131 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: monospace;
+  font-size: x-large;
+  min-width: 100vw;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.ground {
+  background: url("../assets/ground.png") no-repeat center;
+  background-size: cover;
+}
+
+.square {
+  height: 2.5rem !important;
+  width: 2.5rem !important;
+  display: inline-block;
+  color: transparent;
+}
+
+.player {
+  background: url("../assets/player-front.png") no-repeat center;
+  background-color: transparent;
+  background-size: cover;
+  white-space: nowrap;
+}
+
+.player-top {
+  background: url("../assets/player-top.png") no-repeat center;
+  background-color: transparent;
+  background-size: cover;
+  white-space: nowrap;
+}
+.player-left {
+  background: url("../assets/player-left.png") no-repeat center;
+  background-size: cover;
+  white-space: nowrap;
+}
+.player-right {
+  background: url("../assets/player-right.png") no-repeat center;
+  background-size: cover;
+  white-space: nowrap;
+}
+
+.box {
+  background: url("../assets/box.png") no-repeat center;
+  background-size: cover;
+}
+
+.target {
+  background: url("../assets/target.png") no-repeat center;
+  background-size: cover;
+}
+
+.wall {
+  background: url("../assets/wall.png") no-repeat center;
+  background-size: cover;
+}
+
+.box-on-target {
+  background: url("../assets/box-on-target.png") no-repeat center;
+  background-size: cover;
+}
+
+footer {
+  background-color: rgb(68, 184, 172);
+  color: white;
+  grid-area: footer;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+}
+
+h1 {
+  background-color: rgb(68, 184, 172);
+  color: white;
+  padding: 10px;
+  width: 100%;
+  border-radius: 10px;
+}
+
+a {
+  color: white;
+}
+
+#world {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  flex-direction: column-reverse;
+  color: black;
+}
+
+button {
+  outline: none;
+  background-color: rgb(68, 184, 172);
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  line-height: 2rem;
+  font-size: large;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+button:active {
+  background-color: blue;
+}
+
+h1 {
+  text-align: center;
+}
+
+.restart {
+    margin-top: 1rem;
+}
