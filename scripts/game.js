@@ -200,28 +200,16 @@ function initLevel(level) {
  * @returns {boolean}
  */
 function allOnTarget() {
-  return currentTargets.every(
-    (pos) => getSquareAt(pos) === VALIDATED_BOX
-  );
+  return currentTargets.every((pos) => getSquareAt(pos) === VALIDATED_BOX);
 }
 
 /**
  * This method moves an element from one position
  * @param {{x:number, y:number}} pos
  * @param {{x:number, y:number}} newPos
- * @param {{box: boolean, posBox?: {x:number, y:number}}} update
+ * @param {{box: boolean, pull?: boolean, pullFrom?: {x:number, y:number}, posBox?: {x:number, y:number}}} update
  */
 function changeOnMove(pos, newPos, update) {
-  // We replace the box if there is one in front of the player
-  if (update.box) {
-    if (update.posBox) {
-      temporaryMap[update.posBox.y] = replaceAt(
-        temporaryMap[update.posBox.y],
-        update.posBox.x,
-        getSquareAt(update.posBox) === TARGET ? VALIDATED_BOX : BOX
-      );
-    }
-  }
   // We move the player to the next square (where he wants to go)
   temporaryMap[newPos?.y] = replaceAt(
     temporaryMap[newPos?.y],
@@ -236,6 +224,23 @@ function changeOnMove(pos, newPos, update) {
       ? TARGET
       : GROUND
   );
+  // We replace the box if there is one in front of the player
+  if (update.box) {
+    if (update.posBox) {
+      temporaryMap[update.posBox.y] = replaceAt(
+        temporaryMap[update.posBox.y],
+        update.posBox.x,
+        getSquareAt(update.posBox) === TARGET ? VALIDATED_BOX : BOX
+      );
+      if (update.pull) {
+        temporaryMap[update.pullFrom.y] = replaceAt(
+          temporaryMap[update.pullFrom.y],
+          update.pullFrom.x,
+          getSquareAt(update.pullFrom) === VALIDATED_BOX ? TARGET : GROUND
+        );
+      }
+    }
+  }
   incrMoves();
   buildLevel(actualLevel);
 }
@@ -251,23 +256,43 @@ function finishLevel() {
 /**
  * This method is used to get the direction in which the player wants to go
  * @param {string} direction
+ * @param {boolean} isPull
  */
-function move(direction) {
+function move(direction, isPull) {
   const playerPos = getPlayerPosition(actualLevel);
   if (direction === "left") {
     const newPos = { x: playerPos.x - 1, y: playerPos.y };
-    if (!isWall(newPos)) {
-      if (isBox(newPos)) {
-        if (!isObstacle({ x: newPos.x - 1, y: newPos.y })) {
+    if (isPull) {
+      if (!isObstacle(newPos)) {
+        if (isBox({ x: playerPos.x + 1, y: playerPos.y })) {
           changeOnMove(playerPos, newPos, {
             box: true,
-            posBox: { x: newPos.x - 1, y: newPos.y },
+            pull: true,
+            pullFrom: { x: playerPos.x + 1, y: playerPos.y },
+            posBox: { x: playerPos.x, y: playerPos.y },
           });
-          states.push(new State(newPos, { x: newPos.x - 1, y: newPos.y }));
+          states.push(
+            new State(
+              { x: playerPos.x - 1, y: playerPos.y },
+              { x: playerPos.x, y: playerPos.y }
+            )
+          );
         }
-      } else {
-        changeOnMove(playerPos, newPos, { box: false });
-        states.push(new State(newPos));
+      }
+    } else {
+      if (!isWall(newPos)) {
+        if (isBox(newPos)) {
+          if (!isObstacle({ x: newPos.x - 1, y: newPos.y })) {
+            changeOnMove(playerPos, newPos, {
+              box: true,
+              posBox: { x: newPos.x - 1, y: newPos.y },
+            });
+            states.push(new State(newPos, { x: newPos.x - 1, y: newPos.y }));
+          }
+        } else {
+          changeOnMove(playerPos, newPos, { box: false });
+          states.push(new State(newPos));
+        }
       }
     }
     $("#player").removeClass();
@@ -275,18 +300,37 @@ function move(direction) {
     $("#player").addClass("player-left");
   } else if (direction === "right") {
     const newPos = { x: playerPos.x + 1, y: playerPos.y };
-    if (!isWall(newPos)) {
-      if (isBox(newPos)) {
-        if (!isObstacle({ x: newPos.x + 1, y: newPos.y })) {
+    if (isPull) {
+      if (!isObstacle(newPos)) {
+        if (isBox({ x: playerPos.x - 1, y: playerPos.y })) {
           changeOnMove(playerPos, newPos, {
             box: true,
-            posBox: { x: newPos.x + 1, y: newPos.y },
+            pull: true,
+            pullFrom: { x: playerPos.x - 1, y: playerPos.y },
+            posBox: { x: playerPos.x, y: playerPos.y },
           });
-          states.push(new State(newPos, { x: newPos.x + 1, y: newPos.y }));
+          states.push(
+            new State(
+              { x: playerPos.x + 1, y: playerPos.y },
+              { x: playerPos.x, y: playerPos.y }
+            )
+          );
         }
-      } else {
-        changeOnMove(playerPos, newPos, { box: false });
-        states.push(new State(newPos));
+      }
+    } else {
+      if (!isWall(newPos)) {
+        if (isBox(newPos)) {
+          if (!isObstacle({ x: newPos.x + 1, y: newPos.y })) {
+            changeOnMove(playerPos, newPos, {
+              box: true,
+              posBox: { x: newPos.x + 1, y: newPos.y },
+            });
+            states.push(new State(newPos, { x: newPos.x + 1, y: newPos.y }));
+          }
+        } else {
+          changeOnMove(playerPos, newPos, { box: false });
+          states.push(new State(newPos));
+        }
       }
     }
     $("#player").removeClass();
@@ -294,18 +338,37 @@ function move(direction) {
     $("#player").addClass("player-right");
   } else if (direction === "up") {
     const newPos = { x: playerPos?.x, y: playerPos.y - 1 };
-    if (!isWall(newPos)) {
-      if (isBox(newPos)) {
-        if (!isObstacle({ x: newPos?.x, y: newPos.y - 1 })) {
+    if (isPull) {
+      if (!isObstacle(newPos)) {
+        if (isBox({ x: playerPos.x, y: playerPos.y + 1 })) {
           changeOnMove(playerPos, newPos, {
             box: true,
-            posBox: { x: newPos?.x, y: newPos.y - 1 },
+            pull: true,
+            pullFrom: { x: playerPos.x, y: playerPos.y + 1 },
+            posBox: { x: playerPos.x, y: playerPos.y },
           });
-          states.push(new State(newPos, { x: newPos.x, y: newPos.y - 1 }));
+          states.push(
+            new State(
+              { x: playerPos.x, y: playerPos.y + 1 },
+              { x: playerPos.x, y: playerPos.y }
+            )
+          );
         }
-      } else {
-        changeOnMove(playerPos, newPos, { box: false });
-        states.push(new State(newPos));
+      }
+    } else {
+      if (!isWall(newPos)) {
+        if (isBox(newPos)) {
+          if (!isObstacle({ x: newPos?.x, y: newPos.y - 1 })) {
+            changeOnMove(playerPos, newPos, {
+              box: true,
+              posBox: { x: newPos?.x, y: newPos.y - 1 },
+            });
+            states.push(new State(newPos, { x: newPos.x, y: newPos.y - 1 }));
+          }
+        } else {
+          changeOnMove(playerPos, newPos, { box: false });
+          states.push(new State(newPos));
+        }
       }
     }
     $("#player").removeClass();
@@ -313,18 +376,37 @@ function move(direction) {
     $("#player").addClass("player-top");
   } else if (direction === "down") {
     const newPos = { x: playerPos.x, y: playerPos.y + 1 };
-    if (!isWall(newPos)) {
-      if (isBox(newPos)) {
-        if (!isObstacle({ x: newPos?.x, y: newPos.y + 1 })) {
+    if (isPull) {
+      if (!isObstacle(newPos)) {
+        if (isBox({ x: playerPos.x, y: playerPos.y - 1 })) {
           changeOnMove(playerPos, newPos, {
             box: true,
-            posBox: { x: newPos?.x, y: newPos.y + 1 },
+            pull: true,
+            pullFrom: { x: playerPos.x, y: playerPos.y - 1 },
+            posBox: { x: playerPos.x, y: playerPos.y },
           });
-          states.push(new State(newPos, { x: newPos.x, y: newPos.y + 1 }));
+          states.push(
+            new State(
+              { x: playerPos.x, y: playerPos.y - 1 },
+              { x: playerPos.x, y: playerPos.y }
+            )
+          );
         }
-      } else {
-        changeOnMove(playerPos, newPos, { box: false });
-        states.push(new State(newPos));
+      }
+    } else {
+      if (!isWall(newPos)) {
+        if (isBox(newPos)) {
+          if (!isObstacle({ x: newPos?.x, y: newPos.y + 1 })) {
+            changeOnMove(playerPos, newPos, {
+              box: true,
+              posBox: { x: newPos?.x, y: newPos.y + 1 },
+            });
+            states.push(new State(newPos, { x: newPos.x, y: newPos.y + 1 }));
+          }
+        } else {
+          changeOnMove(playerPos, newPos, { box: false });
+          states.push(new State(newPos));
+        }
       }
     }
     $("#player").removeClass();
@@ -342,23 +424,29 @@ function move(direction) {
   }
 }
 
+let keysPressed = {};
+window.onkeyup = function (e) {
+  delete keysPressed[e.which];
+};
 /**
  * On key pressed event
  */
 window.onkeydown = function (e) {
   const key = e.keyCode || e.which;
+  keysPressed[key] = true;
+
   switch (key) {
     case 37:
-      move("left");
+      move("left", keysPressed[16]);
       break;
     case 39:
-      move("right");
+      move("right", keysPressed[16]);
       break;
     case 38:
-      move("up");
+      move("up", keysPressed[16]);
       break;
     case 40:
-      move("down");
+      move("down", keysPressed[16]);
       break;
     case 32:
       if (allOnTarget()) {
@@ -415,17 +503,13 @@ function backToPreviousMove() {
         temporaryMap[lastMove.boxPosition.y] = replaceAt(
           temporaryMap[lastMove.boxPosition.y],
           lastMove.boxPosition.x,
-          getSquareAt(lastMove.boxPosition) === VALIDATED_BOX
-            ? TARGET
-            : GROUND
+          getSquareAt(lastMove.boxPosition) === VALIDATED_BOX ? TARGET : GROUND
         );
         // We check if the box was on a target during the last action, if so we replace it with a validated box and if not with a box
         temporaryMap[lastMove.playerPosition.y] = replaceAt(
           temporaryMap[lastMove.playerPosition.y],
           lastMove.playerPosition.x,
-          getSquareAt(lastMove.playerPosition) === TARGET
-            ? VALIDATED_BOX
-            : BOX
+          getSquareAt(lastMove.playerPosition) === TARGET ? VALIDATED_BOX : BOX
         ); //
       }
     } else {
