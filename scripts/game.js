@@ -273,8 +273,8 @@ function move(direction, isPull) {
           });
           states.push(
             new State(
-              { x: playerPos.x - 1, y: playerPos.y },
-              { x: playerPos.x, y: playerPos.y }
+              { x: playerPos.x + 1, y: playerPos.y },
+              { x: newPos.x, y: newPos.y }
             )
           );
         }
@@ -311,8 +311,8 @@ function move(direction, isPull) {
           });
           states.push(
             new State(
-              { x: playerPos.x + 1, y: playerPos.y },
-              { x: playerPos.x, y: playerPos.y }
+              { x: playerPos.x - 1, y: playerPos.y },
+              { x: newPos.x, y: newPos.y }
             )
           );
         }
@@ -349,8 +349,8 @@ function move(direction, isPull) {
           });
           states.push(
             new State(
-              { x: playerPos.x, y: playerPos.y + 1 },
-              { x: playerPos.x, y: playerPos.y }
+              { x: playerPos.x, y: playerPos.y - 1 },
+              { x: newPos.x, y: newPos.y }
             )
           );
         }
@@ -387,8 +387,8 @@ function move(direction, isPull) {
           });
           states.push(
             new State(
-              { x: playerPos.x, y: playerPos.y - 1 },
-              { x: playerPos.x, y: playerPos.y }
+              { x: playerPos.x, y: playerPos.y + 1 },
+              { x: newPos.x, y: newPos.y }
             )
           );
         }
